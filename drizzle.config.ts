@@ -1,11 +1,12 @@
 
 import { defineConfig } from "drizzle-kit";
+import { config } from "@shared/config";
 
 export default defineConfig({
   out: "./migrations",
   schema: "./shared/schema.ts",
-  driver: 'better-sqlite3',
+  driver: 'pg',
   dbCredentials: {
-    url: 'sqlite.db'
+    connectionString: config.databaseUrl
   },
 });
