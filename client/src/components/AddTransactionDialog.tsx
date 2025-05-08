@@ -5,7 +5,13 @@ import { z } from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { insertTransactionSchema, transactionTypes, transactionStatuses, groupTypes, paymentMethods } from "@shared/schema";
+import {
+  insertTransactionSchema,
+  transactionTypes,
+  transactionStatuses,
+  groupTypes,
+  paymentMethods,
+} from "@shared/schema";
 import {
   Dialog,
   DialogContent,
@@ -46,26 +52,26 @@ const formSchema = insertTransactionSchema.extend({
   id: z.number().optional(),
 });
 
-export default function AddTransactionDialog({ 
-  open, 
+export default function AddTransactionDialog({
+  open,
   onOpenChange,
   groupType,
   defaultValues,
   transactionId,
-  isEditing = false
+  isEditing = false,
 }: AddTransactionDialogProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [dueDate, setDueDate] = useState(new Date().toISOString().split('T')[0]);
-  
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [dueDate, setDueDate] = useState(new Date().toISOString().split("T")[0]);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       description: "",
       amount: "",
-      date: new Date().toISOString().split('T')[0],
-      dueDate: new Date().toISOString().split('T')[0],
+      date: new Date().toISOString().split("T")[0],
+      dueDate: new Date().toISOString().split("T")[0],
       type: groupType === "INCOME" ? "INCOME" : "EXPENSE",
       status: "PENDING",
       groupType: groupType || "GROUP1",
@@ -73,39 +79,36 @@ export default function AddTransactionDialog({
       ...defaultValues,
     },
   });
-  
-  // Resetar o formulário quando mudam os valores padrão (para edição)
+
   useEffect(() => {
     if (defaultValues) {
-      // Converter amount de número para string para o formulário se necessário
       const formattedValues = {
         ...defaultValues,
-        amount: typeof defaultValues.amount === 'number' 
-          ? defaultValues.amount.toString() 
-          : defaultValues.amount
+        amount:
+          typeof defaultValues.amount === "number"
+            ? defaultValues.amount.toString()
+            : defaultValues.amount,
       };
       form.reset(formattedValues);
     }
   }, [defaultValues, form]);
-  
-  // Mutação para adicionar uma nova transação
+
   const addMutation = useMutation({
     mutationFn: async (values: z.infer<typeof formSchema>) => {
-      const numericAmount = values.amount.toString().replace(',', '.');
+      const numericAmount = values.amount.toString().replace(",", ".");
       const formattedValues = {
         ...values,
         amount: numericAmount,
       };
-      
-      return apiRequest('POST', '/api/transactions', formattedValues);
+      return apiRequest("POST", "/api/transactions", formattedValues);
     },
     onSuccess: () => {
       toast({
         title: "Transação adicionada",
         description: "A transação foi adicionada com sucesso.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/summary'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
       form.reset();
       onOpenChange(false);
     },
@@ -117,25 +120,23 @@ export default function AddTransactionDialog({
       });
     },
   });
-  
-  // Mutação para atualizar uma transação existente
+
   const updateMutation = useMutation({
     mutationFn: async (values: z.infer<typeof formSchema>) => {
-      const numericAmount = values.amount.toString().replace(',', '.');
+      const numericAmount = values.amount.toString().replace(",", ".");
       const formattedValues = {
         ...values,
         amount: numericAmount,
       };
-      
-      return apiRequest('PATCH', `/api/transactions/${transactionId}`, formattedValues);
+      return apiRequest("PUT", `/api/transactions/${transactionId}`, formattedValues);
     },
     onSuccess: () => {
       toast({
         title: "Transação atualizada",
         description: "A transação foi atualizada com sucesso.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/summary'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
       form.reset();
       onOpenChange(false);
     },
@@ -147,7 +148,7 @@ export default function AddTransactionDialog({
       });
     },
   });
-  
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (isEditing && transactionId) {
       updateMutation.mutate(values);
@@ -155,21 +156,24 @@ export default function AddTransactionDialog({
       addMutation.mutate(values);
     }
   }
-  
+
   const isPending = addMutation.isPending || updateMutation.isPending;
-  
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
-            {isEditing 
-              ? (form.getValues("type") === "INCOME" ? "Editar Receita" : "Editar Despesa")
-              : (form.getValues("type") === "INCOME" ? "Adicionar Receita" : "Adicionar Despesa")
-            }
+            {isEditing
+              ? form.getValues("type") === "INCOME"
+                ? "Editar Receita"
+                : "Editar Despesa"
+              : form.getValues("type") === "INCOME"
+              ? "Adicionar Receita"
+              : "Adicionar Despesa"}
           </DialogTitle>
         </DialogHeader>
-        
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -185,7 +189,7 @@ export default function AddTransactionDialog({
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="amount"
@@ -199,7 +203,7 @@ export default function AddTransactionDialog({
                 </FormItem>
               )}
             />
-            
+
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -208,16 +212,20 @@ export default function AddTransactionDialog({
                   <FormItem>
                     <FormLabel>Data</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} onChange={(e) => {
-                        field.onChange(e);
-                        setDate(e.target.value);
-                      }} />
+                      <Input
+                        type="date"
+                        {...field}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          setDate(e.target.value);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="dueDate"
@@ -225,17 +233,21 @@ export default function AddTransactionDialog({
                   <FormItem>
                     <FormLabel>Vencimento</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} onChange={(e) => {
-                        field.onChange(e);
-                        setDueDate(e.target.value);
-                      }} />
+                      <Input
+                        type="date"
+                        {...field}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          setDueDate(e.target.value);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -243,8 +255,8 @@ export default function AddTransactionDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Tipo</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
+                    <Select
+                      onValueChange={field.onChange}
                       value={field.value || undefined}
                       defaultValue={field.value || undefined}
                     >
@@ -262,15 +274,15 @@ export default function AddTransactionDialog({
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="status"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
+                    <Select
+                      onValueChange={field.onChange}
                       value={field.value || undefined}
                       defaultValue={field.value || undefined}
                     >
@@ -290,7 +302,7 @@ export default function AddTransactionDialog({
                 )}
               />
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -298,8 +310,8 @@ export default function AddTransactionDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Grupo</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
+                    <Select
+                      onValueChange={field.onChange}
                       value={field.value || undefined}
                       defaultValue={field.value || undefined}
                     >
@@ -318,15 +330,15 @@ export default function AddTransactionDialog({
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="paymentMethod"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Forma de Pagamento</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
+                    <Select
+                      onValueChange={field.onChange}
                       value={field.value || undefined}
                       defaultValue={field.value || undefined}
                     >
@@ -347,13 +359,9 @@ export default function AddTransactionDialog({
                 )}
               />
             </div>
-            
+
             <DialogFooter>
-              <Button 
-                type="submit" 
-                disabled={isPending}
-                className="w-full"
-              >
+              <Button type="submit" disabled={isPending} className="w-full">
                 {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isEditing ? "Atualizar" : "Salvar"}
               </Button>
