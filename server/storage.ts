@@ -47,6 +47,17 @@ export interface IStorage {
 
 // Implementação do armazenamento usando banco de dados
 export class DatabaseStorage implements IStorage {
+  async clearAllData(): Promise<void> {
+    try {
+      await db.delete(transactions);
+      await db.delete(accounts);
+      await db.delete(categories);
+      await db.delete(users);
+    } catch (error) {
+      console.error("Error clearing data:", error);
+      throw new Error("Failed to clear data");
+    }
+  }
   // Users
   async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));

@@ -13,6 +13,15 @@ import {
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Clear all data
+  app.post("/api/clear-data", async (req, res) => {
+    try {
+      await storage.clearAllData();
+      res.json({ message: "All data cleared successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to clear data" });
+    }
+  });
   // Validation schemas
   const idParamSchema = z.object({
     id: z.coerce.number().int().positive(),
