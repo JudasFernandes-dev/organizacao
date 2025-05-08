@@ -35,7 +35,7 @@ export default function Contas() {
         description: "Falha ao carregar contas",
       });
     }
-  }, [error, toast]);
+  }, [error]);
 
   return (
     <main className="flex-1 space-y-4 p-8 pt-6">
