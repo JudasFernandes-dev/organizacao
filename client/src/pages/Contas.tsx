@@ -1,6 +1,6 @@
 
 import React from "react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useFinances } from "@/hooks/useFinances";
 
 export default function Contas() {
