@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useFinances } from "@/hooks/useFinances";
 
@@ -7,12 +6,12 @@ export default function Contas() {
   const { toast } = useToast();
   const { accounts, error } = useFinances();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (error) {
       toast({
+        title: "Error",
+        description: "Failed to fetch accounts data",
         variant: "destructive",
-        title: "Erro",
-        description: "Falha ao carregar contas",
       });
     }
   }, [error, toast]);
