@@ -1,8 +1,20 @@
+
 import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core';
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { sql } from 'drizzle-orm';
+
+export const users = sqliteTable("users", {
+  id: integer("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
+});
+
+export const insertUserSchema = createInsertSchema(users).pick({
+  username: true,
+  password: true,
+});
 
 export const transactionTypes = ["EXPENSE", "INCOME"] as const;
 export type TransactionType = typeof transactionTypes[number];
