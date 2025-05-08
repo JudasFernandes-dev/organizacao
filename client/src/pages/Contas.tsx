@@ -1,8 +1,10 @@
+
 import React from "react";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { useFinances } from "@/hooks/useFinances";
 
 export default function Contas() {
+  const { toast } = useToast();
   const { accounts, error } = useFinances();
 
   React.useEffect(() => {
@@ -13,7 +15,7 @@ export default function Contas() {
         description: "Falha ao carregar contas",
       });
     }
-  }, [error]);
+  }, [error, toast]);
 
   return (
     <main className="flex-1 space-y-4 p-8 pt-6">
@@ -32,7 +34,7 @@ export default function Contas() {
                 {new Intl.NumberFormat("pt-BR", {
                   style: "currency",
                   currency: "BRL",
-                }).format(account.balance)}
+                }).format(Number(account.balance))}
               </p>
             </div>
           </div>
