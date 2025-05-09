@@ -1,16 +1,16 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useFinances } from "@/hooks/useFinances";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
+import { formatCurrency } from "@/lib/utils";
 import { Pencil, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Transaction } from "@shared/schema";
+import AddTransactionDialog from "@/components/AddTransactionDialog";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import AddTransactionDialog from "@/components/AddTransactionDialog";
-import { Transaction } from "@shared/schema";
-import { formatCurrency } from "@/lib/utils";
 
 export default function Contas() {
   const { toast } = useToast();
@@ -19,10 +19,6 @@ export default function Contas() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
-
-  const salaryTransactions = transactions.filter(
-    (t) => t.type === "INCOME" && t.groupType === "INCOME"
-  );
 
   const deleteTransactionMutation = useMutation({
     mutationFn: async (id: number) => {
@@ -55,6 +51,10 @@ export default function Contas() {
       deleteTransactionMutation.mutate(id);
     }
   };
+
+  const salaryTransactions = transactions.filter(
+    (t) => t.type === "INCOME" && t.groupType === "INCOME"
+  );
 
   const columns = [
     {
@@ -178,10 +178,7 @@ export default function Contas() {
         <AddTransactionDialog 
           open={isEditDialogOpen} 
           onOpenChange={setIsEditDialogOpen}
-          defaultValues={{
-            ...selectedTransaction,
-            amount: selectedTransaction.amount.toString()
-          }}
+          defaultValues={selectedTransaction}
           transactionId={selectedTransaction.id}
           isEditing={true}
         />
