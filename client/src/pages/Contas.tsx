@@ -60,64 +60,64 @@ export default function Contas() {
     {
       header: "Nome",
       accessorKey: "description",
-      cell: ({ row }: any) => (
+      cell: (info: any) => (
         <div className="text-sm font-medium text-gray-900">
-          {row.original?.description || ""}
+          {info.row.original?.description}
         </div>
       ),
     },
     {
       header: "Data",
       accessorKey: "dueDate",
-      cell: ({ row }: any) => (
+      cell: (info: any) => (
         <div className="text-sm font-medium text-gray-900">
-          {row.original?.dueDate || ""}
+          {info.row.original?.dueDate}
         </div>
       ),
     },
     {
       header: "Valor",
       accessorKey: "amount",
-      cell: ({ row }: any) => (
+      cell: (info: any) => (
         <div className="text-sm font-medium">
-          {row.original?.amount ? formatCurrency(Number(row.original.amount)) : "R$ 0,00"}
+          {info.row.original?.amount ? formatCurrency(Number(info.row.original.amount)) : "R$ 0,00"}
         </div>
       ),
     },
     {
       header: "Status",
       accessorKey: "status",
-      cell: ({ row }: any) => (
+      cell: (info: any) => (
         <div className="text-sm">
           <span
             className={`status-badge ${
-              row.original?.status === "PENDING" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"
+              info.row.original?.status === "PENDING" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"
             } px-2 py-1 rounded-full`}
           >
-            {row.original?.status === "PENDING" ? "Pendente" : "Recebido"}
+            {info.row.original?.status === "PENDING" ? "Pendente" : "Recebido"}
           </span>
         </div>
       ),
     },
     {
       header: "Ações",
-      id: "actions",
-      cell: ({ row }: any) => {
-        if (!row.original?.id) return null;
+      accessorKey: "actions",
+      cell: (info: any) => {
+        if (!info.row.original?.id) return null;
         
         return (
           <div className="flex space-x-2">
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleEditTransaction(row.original)}
+              onClick={() => handleEditTransaction(info.row.original)}
             >
               <Pencil className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleDeleteTransaction(row.original.id)}
+              onClick={() => handleDeleteTransaction(info.row.original.id)}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -143,20 +143,20 @@ export default function Contas() {
         <CardContent>
           <DataTable
             columns={columns}
-            data={salaryTransactions || []}
+            data={salaryTransactions}
             footerRow={
-              <tr key="footer" className="hover:bg-gray-50">
-                <td key="desc" className="px-4 py-2">
+              <tr key="footer">
+                <td key="description" className="px-4 py-2">
                   <div className="text-sm font-medium">SOMA DOS VALORES</div>
                 </td>
                 <td key="date"></td>
                 <td key="amount" className="px-4 py-2">
                   <div className="text-sm font-medium">
                     {formatCurrency(
-                      (salaryTransactions || []).reduce(
-                        (sum, t) => sum + Number(t?.amount || 0),
-                        0,
-                      ),
+                      salaryTransactions.reduce(
+                        (sum, t) => sum + (t?.amount ? Number(t.amount) : 0),
+                        0
+                      )
                     )}
                   </div>
                 </td>
