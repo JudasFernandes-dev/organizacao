@@ -80,7 +80,7 @@ export default function Contas() {
       accessorKey: "amount",
       cell: (info: any) => (
         <div className="text-sm font-medium">
-          {formatCurrency(Number(info.getValue() || 0))}
+          {info.getValue() ? formatCurrency(Number(info.getValue())) : "R$ 0,00"}
         </div>
       ),
     },
@@ -102,27 +102,29 @@ export default function Contas() {
     {
       header: "Ações",
       accessorKey: "id",
-      cell: (info: any) => (
-        <div className="flex space-x-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              const transaction = salaryTransactions.find(t => t.id === info.getValue());
-              if (transaction) handleEditTransaction(transaction);
-            }}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDeleteTransaction(info.getValue())}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      ),
+      cell: (info: any) => {
+        const transaction = salaryTransactions.find(t => t.id === info.getValue());
+        if (!transaction) return null;
+        
+        return (
+          <div className="flex space-x-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleEditTransaction(transaction)}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleDeleteTransaction(transaction.id)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        );
+      },
     },
   ];
 
@@ -145,7 +147,7 @@ export default function Contas() {
             data={salaryTransactions}
             footerRow={
               <tr key="footer">
-                <td key="desc" className="px-4 py-2">
+                <td key="description" className="px-4 py-2">
                   <div className="text-sm font-medium">SOMA DOS VALORES</div>
                 </td>
                 <td key="date"></td>
