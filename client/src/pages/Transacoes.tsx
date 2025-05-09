@@ -12,7 +12,7 @@ export default function Transacoes() {
   const { toast } = useToast();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedGroupType, setSelectedGroupType] = useState<string>('GROUP1');
-  
+
   // Fetch all transactions
   const { data: transactions = [], isLoading: transactionsLoading, error: transactionsError } = useQuery<Transaction[]>({
     queryKey: ['/api/transactions'],
@@ -20,7 +20,7 @@ export default function Transacoes() {
     refetchOnWindowFocus: true,
     refetchOnMount: true
   });
-  
+
   // Handle errors
   if (transactionsError) {
     toast({
@@ -29,39 +29,39 @@ export default function Transacoes() {
       variant: 'destructive',
     });
   }
-  
+
   // Filter transactions by group
   const group1Transactions = transactions.filter(
     (t) => t.groupType === 'GROUP1'
   );
-  
+
   const group2Transactions = transactions.filter(
     (t) => t.groupType === 'GROUP2'
   );
-  
+
   // Get Nubank card total
   const nubankTotal = transactions.filter(
     (t) => t.paymentMethod === 'NUBANK' && t.type === 'EXPENSE'
   ).reduce((sum, t) => sum + Number(t.amount), 0);
-  
+
   // Get Inter card total
   const interTotal = transactions.filter(
     (t) => t.paymentMethod === 'INTER' && t.type === 'EXPENSE'
   ).reduce((sum, t) => sum + Number(t.amount), 0);
-  
+
   // Calculate payment summaries for Group 2
   const nubankGroup2Total = group2Transactions
     .filter(t => t.paymentMethod === 'NUBANK')
     .reduce((sum, t) => sum + Number(t.amount), 0);
-    
+
   const interGroup2Total = group2Transactions
     .filter(t => t.paymentMethod === 'INTER')
     .reduce((sum, t) => sum + Number(t.amount), 0);
-  
+
   const handleAddTransaction = () => {
     setIsAddDialogOpen(true);
   };
-  
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -72,7 +72,7 @@ export default function Transacoes() {
           </Button>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 gap-6">
         <ExpenseGroup 
           title="Grupo 1 - Contas a Pagar"
@@ -83,8 +83,9 @@ export default function Transacoes() {
             label: "Nubank Cartão",
             value: nubankTotal
           }}
+          showActions={true}
         />
-        
+
         <ExpenseGroup 
           title="Grupo 2 - Despesas Adicionais"
           transactions={group2Transactions}
@@ -94,9 +95,10 @@ export default function Transacoes() {
             { id: 1, label: "PAGAR COM NUBANK", value: nubankGroup2Total },
             { id: 2, label: "PAGAR COM INTER", value: interGroup2Total },
           ]}
+          showActions={true}
         />
       </div>
-      
+
       <AddTransactionDialog 
         open={isAddDialogOpen} 
         onOpenChange={setIsAddDialogOpen}

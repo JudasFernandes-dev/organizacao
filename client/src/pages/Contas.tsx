@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useFinances } from "@/hooks/useFinances";
@@ -106,7 +105,7 @@ export default function Contas() {
         const id = info.getValue();
         const transaction = salaryTransactions.find((t) => t.id === id);
         if (!transaction) return null;
-        
+
         return (
           <div className="flex space-x-2">
             <Button
@@ -178,6 +177,8 @@ export default function Contas() {
             type: "INCOME",
             groupType: "INCOME",
           }}
+          showAddButton={true}
+          showActions={true}
         />
       )}
 

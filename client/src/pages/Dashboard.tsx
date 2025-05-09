@@ -14,19 +14,19 @@ import {
 
 export default function Dashboard() {
   const { toast } = useToast();
-  
+
   // Fetch dashboard summary
   const { data: summary, isLoading: summaryLoading, error: summaryError } = useQuery({
     queryKey: ['/api/dashboard/summary'],
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
-  
+
   // Fetch all transactions
   const { data: transactions, isLoading: transactionsLoading, error: transactionsError } = useQuery({
     queryKey: ['/api/transactions'],
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
-  
+
   // Handle errors
   useEffect(() => {
     if (summaryError) {
@@ -36,7 +36,7 @@ export default function Dashboard() {
         variant: 'destructive',
       });
     }
-    
+
     if (transactionsError) {
       toast({
         title: 'Erro ao carregar transações',
@@ -45,34 +45,34 @@ export default function Dashboard() {
       });
     }
   }, [summaryError, transactionsError, toast]);
-  
+
   // Filter transactions by group
   const group1Transactions = transactions?.filter(
     (t) => t.groupType === 'GROUP1'
   ) || [];
-  
+
   const group2Transactions = transactions?.filter(
     (t) => t.groupType === 'GROUP2'
   ) || [];
-  
+
   const incomeTransactions = transactions?.filter(
     (t) => t.type === 'INCOME'
   ) || [];
-  
+
   // Get Nubank card total
   const nubankTotal = transactions?.filter(
     (t) => t.paymentMethod === 'NUBANK' && t.type === 'EXPENSE'
   ).reduce((sum, t) => sum + Number(t.amount), 0) || 0;
-  
+
   // Calculate payment summaries for Group 2
   const nubankGroup2Total = group2Transactions
     .filter(t => t.paymentMethod === 'NUBANK')
     .reduce((sum, t) => sum + Number(t.amount), 0);
-    
+
   const interGroup2Total = group2Transactions
     .filter(t => t.paymentMethod === 'INTER')
     .reduce((sum, t) => sum + Number(t.amount), 0);
-  
+
   return (
     <>
       {/* Summary Cards */}
@@ -84,7 +84,7 @@ export default function Dashboard() {
           iconBg="bg-blue-100"
           isLoading={summaryLoading}
         />
-        
+
         <SummaryCard 
           title="Receitas"
           value={summary?.income || 0}
@@ -93,7 +93,7 @@ export default function Dashboard() {
           isPositive
           isLoading={summaryLoading}
         />
-        
+
         <SummaryCard 
           title="Despesas"
           value={summary?.expenses || 0}
@@ -102,7 +102,7 @@ export default function Dashboard() {
           isNegative
           isLoading={summaryLoading}
         />
-        
+
         <SummaryCard 
           title="Saldo restante"
           value={summary?.remainingBalance || 0}
@@ -111,7 +111,7 @@ export default function Dashboard() {
           isLoading={summaryLoading}
         />
       </div>
-      
+
       {/* Expense Groups */}
       <div className="grid grid-cols-1 gap-6 mb-6">
         <ExpenseGroup 
@@ -124,8 +124,9 @@ export default function Dashboard() {
             value: nubankTotal
           }}
           showAddButton={false}
+          showActions={false}
         />
-        
+
         <ExpenseGroup 
           title="Grupo 2 - Despesas Adicionais"
           transactions={group2Transactions}
@@ -136,16 +137,17 @@ export default function Dashboard() {
             { id: 2, label: "PAGAR COM INTER", value: interGroup2Total },
           ]}
           showAddButton={false}
+          showActions={false}
         />
       </div>
-      
+
       {/* Income Section */}
       <IncomeSection 
         transactions={incomeTransactions}
         isLoading={transactionsLoading}
         showAddButton={false}
       />
-      
+
       {/* Financial Summary */}
       <FinancialSummary 
         expenses={{
