@@ -18,13 +18,6 @@ interface IncomeSectionProps {
   showActions?: boolean;
 }
 
-type IncomeSectionProps = {
-  transactions: Transaction[];
-  isLoading?: boolean;
-  showAddButton?: boolean;
-  showActions?: boolean;
-};
-
 export default function IncomeSection({ 
   transactions,
   isLoading = false,
