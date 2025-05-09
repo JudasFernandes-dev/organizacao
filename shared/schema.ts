@@ -25,7 +25,7 @@ export type TransactionStatus = typeof transactionStatuses[number];
 export const groupTypes = ["GROUP1", "GROUP2", "INCOME"] as const;
 export type GroupType = typeof groupTypes[number];
 
-export const paymentMethods = ["NUBANK", "INTER", "CASH", "OTHER"] as const;
+export const paymentMethods = ["NUBANK", "INTER", "PIX", "CASH", "OTHER"] as const;
 export type PaymentMethod = typeof paymentMethods[number];
 
 export const categories = sqliteTable("categories", {
