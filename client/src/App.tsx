@@ -7,6 +7,7 @@ import Dashboard from "@/pages/Dashboard";
 import Contas from "@/pages/Contas";
 import Transacoes from "@/pages/Transacoes";
 import Relatorios from "@/pages/Relatorios";
+import PlanningPage from "@/pages/PlanningPage";
 import Layout from "@/components/Layout";
 import NotFound from "@/pages/not-found";
 
@@ -17,6 +18,7 @@ function Router() {
       <Route path="/contas" component={Contas} />
       <Route path="/transacoes" component={Transacoes} />
       <Route path="/relatorios" component={Relatorios} />
+      <Route path="/planejamento" component={PlanningPage} />
       <Route component={NotFound} />
     </Switch>
   );
