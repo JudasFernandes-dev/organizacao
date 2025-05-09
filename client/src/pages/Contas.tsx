@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useFinances } from "@/hooks/useFinances";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -97,24 +97,27 @@ export default function Contas() {
     {
       header: "Ações",
       id: "actions",
-      cell: (info: any) => (
-        <div className="flex space-x-2">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => handleEditTransaction(info.row.original)}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => handleDeleteTransaction(info.row.original.id)}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      ),
+      cell: (info: any) => {
+        const transaction = info.row.original;
+        return (
+          <div className="flex space-x-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => handleEditTransaction(transaction)}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => handleDeleteTransaction(transaction.id)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        );
+      },
     },
   ];
 
@@ -170,7 +173,9 @@ export default function Contas() {
         onOpenChange={setIsAddDialogOpen}
         defaultValues={{
           type: "INCOME",
-          groupType: "INCOME"
+          groupType: "INCOME",
+          status: "PENDING",
+          paymentMethod: "OTHER"
         }}
       />
 
@@ -178,7 +183,10 @@ export default function Contas() {
         <AddTransactionDialog 
           open={isEditDialogOpen} 
           onOpenChange={setIsEditDialogOpen}
-          defaultValues={selectedTransaction}
+          defaultValues={{
+            ...selectedTransaction,
+            amount: selectedTransaction.amount.toString()
+          }}
           transactionId={selectedTransaction.id}
           isEditing={true}
         />
