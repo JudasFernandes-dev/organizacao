@@ -21,7 +21,8 @@ type IncomeSectionProps = {
 export default function IncomeSection({ 
   transactions,
   isLoading = false,
-  showAddButton = true
+  showAddButton = true,
+  showActions = true
 }: IncomeSectionProps) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
