@@ -103,22 +103,23 @@ export default function Contas() {
       header: "Ações",
       accessorKey: "id",
       cell: (info: any) => {
-        const row = info.row.original;
-        if (!row) return null;
+        const id = info.getValue();
+        const transaction = salaryTransactions.find((t) => t.id === id);
+        if (!transaction) return null;
         
         return (
           <div className="flex space-x-2">
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleEditTransaction(row)}
+              onClick={() => handleEditTransaction(transaction)}
             >
               <Pencil className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleDeleteTransaction(row.id)}
+              onClick={() => handleDeleteTransaction(transaction.id)}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
