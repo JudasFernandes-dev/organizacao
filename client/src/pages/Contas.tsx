@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useFinances } from "@/hooks/useFinances";
@@ -18,15 +17,16 @@ export default function Contas() {
   const { transactions } = useFinances();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<Transaction | null>(null);
 
   const deleteTransactionMutation = useMutation({
     mutationFn: async (id: number) => {
       return apiRequest("DELETE", `/api/transactions/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/summary'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
       toast({
         title: "Sucesso",
         description: "Transação excluída com sucesso",
@@ -52,9 +52,10 @@ export default function Contas() {
     }
   };
 
-  const salaryTransactions = transactions?.filter(
-    (t) => t.type === "INCOME" && t.groupType === "INCOME"
-  ) || [];
+  const salaryTransactions =
+    transactions?.filter(
+      (t) => t.type === "INCOME" && t.groupType === "INCOME",
+    ) || [];
 
   const columns = [
     {
@@ -69,28 +70,35 @@ export default function Contas() {
     {
       header: "Data",
       accessorKey: "dueDate",
-      cell: ({ row }: any) => (
-        <div className="text-sm text-gray-500">
-          {new Date(row.original.dueDate).toLocaleDateString()}
+      cell: (info: any) => (
+        <div className="text-sm font-medium text-gray-900">
+          {info.getValue() || "Sem descrição"}{" "}
+          {/* Valor padrão se não houver descrição */}
         </div>
       ),
     },
     {
       header: "Valor",
       accessorKey: "amount",
-      cell: ({ row }: any) => (
-        <div className="text-sm font-medium">
-          {formatCurrency(Number(row.original.amount))}
-        </div>
-      ),
+      cell: ({ row }: any) => {
+        const amount = row?.original?.amount; // Usar optional chaining para evitar erro caso row original esteja indefinido
+        return (
+          <div className="text-sm font-medium">
+            {amount ? formatCurrency(Number(amount)) : "Valor não disponível"}{" "}
+            {/* Exibe um valor alternativo se amount for indefinido */}
+          </div>
+        );
+      },
     },
     {
       header: "Status",
       accessorKey: "status",
       cell: ({ row }: any) => (
         <div className="text-sm">
-          <span className={`status-badge ${row.original.status === "PENDING" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"} px-2 py-1 rounded-full`}>
-            {row.original.status === "PENDING" ? "Pendente" : "Recebido"}
+          <span
+            className={`status-badge ${row?.original?.status === "PENDING" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"} px-2 py-1 rounded-full`}
+          >
+            {row?.original?.status === "PENDING" ? "Pendente" : "Recebido"}
           </span>
         </div>
       ),
@@ -100,17 +108,24 @@ export default function Contas() {
       id: "actions",
       cell: ({ row }: any) => (
         <div className="flex space-x-2">
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => handleEditTransaction(row.original)}
           >
             <Pencil className="h-4 w-4" />
           </Button>
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="sm"
-            onClick={() => handleDeleteTransaction(row.original.id)}
+            onClick={() => {
+              const transactionId = row?.original?.id;
+              if (transactionId !== undefined) {
+                handleDeleteTransaction(transactionId);
+              } else {
+                console.error("Transaction ID is undefined");
+              }
+            }}
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -123,9 +138,7 @@ export default function Contas() {
     <main className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Contas</h2>
-        <Button onClick={() => setIsAddDialogOpen(true)}>
-          Nova Receita
-        </Button>
+        <Button onClick={() => setIsAddDialogOpen(true)}>Nova Receita</Button>
       </div>
 
       <Card className="mb-6">
@@ -135,8 +148,8 @@ export default function Contas() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <DataTable 
-            columns={columns} 
+          <DataTable
+            columns={columns}
             data={salaryTransactions}
             footerRow={
               <tr className="hover:bg-gray-50">
@@ -149,8 +162,8 @@ export default function Contas() {
                     {formatCurrency(
                       salaryTransactions.reduce(
                         (sum, t) => sum + Number(t.amount),
-                        0
-                      )
+                        0,
+                      ),
                     )}
                   </div>
                 </td>
@@ -163,19 +176,19 @@ export default function Contas() {
       </Card>
 
       {isAddDialogOpen && (
-        <AddTransactionDialog 
-          open={isAddDialogOpen} 
+        <AddTransactionDialog
+          open={isAddDialogOpen}
           onOpenChange={setIsAddDialogOpen}
           defaultValues={{
             type: "INCOME",
-            groupType: "INCOME"
+            groupType: "INCOME",
           }}
         />
       )}
 
       {selectedTransaction && isEditDialogOpen && (
-        <AddTransactionDialog 
-          open={isEditDialogOpen} 
+        <AddTransactionDialog
+          open={isEditDialogOpen}
           onOpenChange={setIsEditDialogOpen}
           defaultValues={selectedTransaction}
           transactionId={selectedTransaction.id}
