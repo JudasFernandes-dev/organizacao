@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -104,14 +103,14 @@ const TripDetailsPage = () => {
 
   const calculateTotals = () => {
     if (!trip) return { flights: 0, hotels: 0, activities: 0, restaurants: 0, total: 0 };
-    
+
     const totals = {
       flights: trip.items.filter(i => i.type === 'flight').reduce((sum, i) => sum + i.amount, 0),
       hotels: trip.items.filter(i => i.type === 'hotel').reduce((sum, i) => sum + i.amount, 0),
       activities: trip.items.filter(i => i.type === 'activity').reduce((sum, i) => sum + i.amount, 0),
       restaurants: trip.items.filter(i => i.type === 'restaurant').reduce((sum, i) => sum + i.amount, 0)
     };
-    
+
     return {
       ...totals,
       total: Object.values(totals).reduce((sum, value) => sum + value, 0)
@@ -161,7 +160,7 @@ const TripDetailsPage = () => {
                     Adicionar
                   </Button>
                 </div>
-                
+
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {trip.items
                     .filter(item => item.type === tabValue.slice(0, -1))
@@ -201,7 +200,7 @@ const TripDetailsPage = () => {
                   <p className="text-lg font-semibold">R$ {totals.restaurants.toFixed(2)}</p>
                 </div>
               </div>
-              
+
               <div className="pt-4 border-t">
                 <div className="flex justify-between items-center">
                   <div>
