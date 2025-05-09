@@ -116,6 +116,8 @@ export default function IncomeSection({
       accessorKey: "id",
       width: "15%", // Ações com tamanho fixo
       cell: (info) => {
+        if (!showActions) return null;
+        
         const id = info.getValue() as number;
         const transaction = transactions.find(t => t.id === id);
         if (!transaction) return null;
