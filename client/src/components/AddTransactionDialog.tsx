@@ -128,7 +128,7 @@ export default function AddTransactionDialog({
         ...values,
         amount: numericAmount,
       };
-      return apiRequest("PUT", `/api/transactions/${transactionId}`, formattedValues);
+      return apiRequest("PATCH", `/api/transactions/${transactionId}`, formattedValues);
     },
     onSuccess: () => {
       toast({
@@ -137,9 +137,8 @@ export default function AddTransactionDialog({
       });
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
       form.reset();
       onOpenChange(false);
     },
