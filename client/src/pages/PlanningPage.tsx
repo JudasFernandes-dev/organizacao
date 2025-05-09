@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,6 +10,7 @@ import { format } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plane, Hotel, Utensils, MapPin } from 'lucide-react';
+import { Label } from '@/components/ui/label';
 
 interface TravelItem {
   id: string;
@@ -38,6 +38,8 @@ const PlanningPage: React.FC = () => {
   const [travels, setTravels] = useState<Travel[]>([]);
   const [selectedTravel, setSelectedTravel] = useState<Travel | null>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [showAddItem, setShowAddItem] = useState(false);
+  const [itemType, setItemType] = useState<'flight' | 'hotel' | 'activity' | 'restaurant'>('flight');
 
   const calculateTotals = (travel: Travel) => {
     const totals = {
@@ -261,13 +263,10 @@ const PlanningPage: React.FC = () => {
               </TabsContent>
 
               <TabsContent value="flights" className="space-y-4">
-                <Button onClick={() => handleAddItem(selectedTravel.id, {
-                  id: '',
-                  type: 'flight',
-                  name: '',
-                  amount: 0,
-                  paid: false
-                })}>
+                <Button onClick={() => {
+                  setItemType('flight');
+                  setShowAddItem(true);
+                }}>
                   Adicionar Voo
                 </Button>
                 {selectedTravel.items
@@ -283,13 +282,10 @@ const PlanningPage: React.FC = () => {
               </TabsContent>
 
               <TabsContent value="hotels" className="space-y-4">
-                <Button onClick={() => handleAddItem(selectedTravel.id, {
-                  id: '',
-                  type: 'hotel',
-                  name: '',
-                  amount: 0,
-                  paid: false
-                })}>
+                <Button onClick={() => {
+                  setItemType('hotel');
+                  setShowAddItem(true);
+                }}>
                   Adicionar Hotel
                 </Button>
                 {selectedTravel.items
@@ -305,13 +301,10 @@ const PlanningPage: React.FC = () => {
               </TabsContent>
 
               <TabsContent value="activities" className="space-y-4">
-                <Button onClick={() => handleAddItem(selectedTravel.id, {
-                  id: '',
-                  type: 'activity',
-                  name: '',
-                  amount: 0,
-                  paid: false
-                })}>
+                <Button onClick={() => {
+                  setItemType('activity');
+                  setShowAddItem(true);
+                }}>
                   Adicionar Passeio
                 </Button>
                 {selectedTravel.items
@@ -327,13 +320,10 @@ const PlanningPage: React.FC = () => {
               </TabsContent>
 
               <TabsContent value="restaurants" className="space-y-4">
-                <Button onClick={() => handleAddItem(selectedTravel.id, {
-                  id: '',
-                  type: 'restaurant',
-                  name: '',
-                  amount: 0,
-                  paid: false
-                })}>
+                <Button onClick={() => {
+                  setItemType('restaurant');
+                  setShowAddItem(true);
+                }}>
                   Adicionar Restaurante
                 </Button>
                 {selectedTravel.items
@@ -351,6 +341,211 @@ const PlanningPage: React.FC = () => {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Add Item Dialog */}
+      <Dialog open={showAddItem} onOpenChange={setShowAddItem}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Adicionar {itemType === 'flight' ? 'Voo' : itemType === 'hotel' ? 'Hotel' : itemType === 'activity' ? 'Passeio' : 'Restaurante'}</DialogTitle>
+          </DialogHeader>
+          <form className="space-y-4" onSubmit={(e) => {
+            e.preventDefault();
+            const formData = new FormData(e.currentTarget);
+            const newItem = {
+              id: Date.now().toString(),
+              type: itemType,
+              name: formData.get('name') as string,
+              amount: Number(formData.get('amount')),
+              paid: false,
+              date: formData.get('date') as string,
+              details: {}
+            };
+
+            if (itemType === 'flight') {
+              newItem.details = {
+                airline: formData.get('airline'),
+                flightNumber: formData.get('flightNumber'),
+                departure: formData.get('departure'),
+                arrival: formData.get('arrival'),
+                departureTime: formData.get('departureTime'),
+                arrivalTime: formData.get('arrivalTime')
+              };
+            } else if (itemType === 'hotel') {
+              newItem.details = {
+                checkIn: formData.get('checkIn'),
+                checkOut: formData.get('checkOut'),
+                address: formData.get('address'),
+                roomType: formData.get('roomType'),
+                guests: formData.get('guests')
+              };
+            } else if (itemType === 'activity') {
+              newItem.details = {
+                location: formData.get('location'),
+                duration: formData.get('duration'),
+                includesTransport: formData.get('includesTransport') === 'true',
+                notes: formData.get('notes')
+              };
+            } else if (itemType === 'restaurant') {
+              newItem.details = {
+                cuisine: formData.get('cuisine'),
+                reservationTime: formData.get('reservationTime'),
+                people: formData.get('people'),
+                address: formData.get('address')
+              };
+            }
+
+            handleAddItem(selectedTravel.id, newItem);
+            setShowAddItem(false);
+          }}>
+            <div className="space-y-2">
+              <Label>Nome</Label>
+              <Input name="name" required />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Data</Label>
+                <Input type="date" name="date" required />
+              </div>
+              <div className="space-y-2">
+                <Label>Valor</Label>
+                <Input type="number" step="0.01" name="amount" required />
+              </div>
+            </div>
+
+            {itemType === 'flight' && (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Companhia Aérea</Label>
+                    <Input name="airline" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Número do Voo</Label>
+                    <Input name="flightNumber" required />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Origem</Label>
+                    <Input name="departure" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Destino</Label>
+                    <Input name="arrival" required />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Horário Partida</Label>
+                    <Input type="time" name="departureTime" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Horário Chegada</Label>
+                    <Input type="time" name="arrivalTime" required />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {itemType === 'hotel' && (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Check-in</Label>
+                    <Input type="date" name="checkIn" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Check-out</Label>
+                    <Input type="date" name="checkOut" required />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Endereço</Label>
+                  <Input name="address" required />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Tipo de Quarto</Label>
+                    <Select name="roomType" required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="single">Solteiro</SelectItem>
+                        <SelectItem value="double">Casal</SelectItem>
+                        <SelectItem value="suite">Suíte</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Hóspedes</Label>
+                    <Input type="number" name="guests" required />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {itemType === 'activity' && (
+              <>
+                <div className="space-y-2">
+                  <Label>Local</Label>
+                  <Input name="location" required />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Duração (horas)</Label>
+                    <Input type="number" name="duration" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Inclui Transporte</Label>
+                    <Select name="includesTransport" required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="true">Sim</SelectItem>
+                        <SelectItem value="false">Não</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Observações</Label>
+                  <Textarea name="notes" />
+                </div>
+              </>
+            )}
+
+            {itemType === 'restaurant' && (
+              <>
+                <div className="space-y-2">
+                  <Label>Tipo de Cozinha</Label>
+                  <Input name="cuisine" required />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Horário da Reserva</Label>
+                    <Input type="time" name="reservationTime" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Número de Pessoas</Label>
+                    <Input type="number" name="people" required />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Endereço</Label>
+                  <Input name="address" required />
+                </div>
+              </>
+            )}
+
+            <DialogFooter>
+              <Button type="submit">Salvar</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
