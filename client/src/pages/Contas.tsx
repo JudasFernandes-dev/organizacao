@@ -61,7 +61,7 @@ export default function Contas() {
       header: "Nome",
       accessorKey: "description",
       cell: (info: any) => (
-        <div className="text-sm font-medium text-gray-900">
+        <div key={`desc-${info.row.id}`} className="text-sm font-medium text-gray-900">
           {info.getValue()}
         </div>
       ),
@@ -146,12 +146,12 @@ export default function Contas() {
             columns={columns}
             data={salaryTransactions}
             footerRow={
-              <tr key="footer">
-                <td key="description" className="px-4 py-2">
+              <tr key="footer-row">
+                <td key="footer-desc" className="px-4 py-2">
                   <div className="text-sm font-medium">SOMA DOS VALORES</div>
                 </td>
-                <td key="date"></td>
-                <td key="amount" className="px-4 py-2">
+                <td key="footer-date"></td>
+                <td key="footer-amount" className="px-4 py-2">
                   <div className="text-sm font-medium">
                     {formatCurrency(
                       salaryTransactions.reduce(
@@ -161,8 +161,8 @@ export default function Contas() {
                     )}
                   </div>
                 </td>
-                <td key="status"></td>
-                <td key="actions"></td>
+                <td key="footer-status"></td>
+                <td key="footer-actions"></td>
               </tr>
             }
           />
