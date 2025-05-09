@@ -15,6 +15,7 @@ type IncomeSectionProps = {
   transactions: Transaction[];
   isLoading?: boolean;
   showAddButton?: boolean;
+  showActions?: boolean;
 };
 
 export default function IncomeSection({ 
