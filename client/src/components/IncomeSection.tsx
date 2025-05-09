@@ -11,6 +11,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Transaction } from '@shared/schema';
 import { useToast } from '@/hooks/use-toast';
 
+interface IncomeSectionProps {
+  transactions: Transaction[];
+  isLoading?: boolean;
+  showAddButton?: boolean;
+  showActions?: boolean;
+}
+
 type IncomeSectionProps = {
   transactions: Transaction[];
   isLoading?: boolean;
