@@ -348,10 +348,11 @@ export default function AddTransactionDialog({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="NUBANK">NUBANK</SelectItem>
-                        <SelectItem value="INTER">INTER</SelectItem>
-                        <SelectItem value="CASH">CASH</SelectItem>
-                        <SelectItem value="OTHER">OTHER</SelectItem>
+                        <SelectItem value="NUBANK">Nubank</SelectItem>
+                        <SelectItem value="INTER">Inter</SelectItem>
+                        <SelectItem value="PIX">Pix</SelectItem>
+                        <SelectItem value="CASH">Dinheiro</SelectItem>
+                        <SelectItem value="OTHER">Outros</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
