@@ -137,6 +137,9 @@ export default function AddTransactionDialog({
       });
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/summary"] });
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
       form.reset();
       onOpenChange(false);
     },

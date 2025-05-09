@@ -17,6 +17,8 @@ export default function Transacoes() {
   const { data: transactions = [], isLoading: transactionsLoading, error: transactionsError } = useQuery<Transaction[]>({
     queryKey: ['/api/transactions'],
     staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: true,
+    refetchOnMount: true
   });
   
   // Handle errors
