@@ -60,11 +60,11 @@ export default function Contas() {
     {
       header: "Nome",
       accessorKey: "description",
-      cell: (info) => info.row?.original?.description ? (
+      cell: (info: any) => (
         <div className="text-sm font-medium text-gray-900">
-          {info.row.original.description}
+          {info.getValue()}
         </div>
-      ) : null,
+      ),
     },
     {
       header: "Data",
@@ -87,22 +87,17 @@ export default function Contas() {
     {
       header: "Status",
       accessorKey: "status",
-      cell: (info) => {
-        const status = info.row?.original?.status;
-        if (!status) return null;
-        
-        return (
-          <div className="text-sm">
-            <span
-              className={`status-badge ${
-                status === "PENDING" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"
-              } px-2 py-1 rounded-full`}
-            >
-              {status === "PENDING" ? "Pendente" : "Recebido"}
-            </span>
-          </div>
-        );
-      },
+      cell: (info: any) => (
+        <div className="text-sm">
+          <span
+            className={`status-badge ${
+              info.getValue() === "PENDING" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"
+            } px-2 py-1 rounded-full`}
+          >
+            {info.getValue() === "PENDING" ? "Pendente" : "Recebido"}
+          </span>
+        </div>
+      ),
     },
     {
       header: "Ações",
