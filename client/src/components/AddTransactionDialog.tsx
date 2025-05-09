@@ -72,9 +72,9 @@ export default function AddTransactionDialog({
       amount: "",
       date: new Date().toISOString().split("T")[0],
       dueDate: new Date().toISOString().split("T")[0],
-      type: groupType === "INCOME" ? "INCOME" : "EXPENSE",
+      type: "EXPENSE",
       status: "PENDING",
-      groupType: groupType || "GROUP1",
+      groupType: "GROUP1",
       paymentMethod: "NUBANK",
       ...defaultValues,
     },
@@ -324,7 +324,6 @@ export default function AddTransactionDialog({
                       <SelectContent>
                         <SelectItem value="GROUP1">Grupo 1</SelectItem>
                         <SelectItem value="GROUP2">Grupo 2</SelectItem>
-                        <SelectItem value="INCOME">Receitas</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
