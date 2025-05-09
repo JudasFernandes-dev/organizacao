@@ -5,13 +5,20 @@ import { useFinances } from "@/hooks/useFinances";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
 import { formatCurrency } from "@/lib/utils";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Transaction } from "@shared/schema";
+import AddTransactionDialog from "@/components/AddTransactionDialog";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function Contas() {
   const { toast } = useToast();
   const { accounts, transactions, error } = useFinances();
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (error) {
@@ -22,6 +29,39 @@ export default function Contas() {
       });
     }
   }, [error, toast]);
+
+  const handleEditTransaction = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    setIsEditDialogOpen(true);
+  };
+
+  const deleteTransactionMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return apiRequest("DELETE", `/api/transactions/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/summary'] });
+      toast({
+        title: "Transação excluída",
+        description: "A transação foi excluída com sucesso",
+        variant: "default",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro ao excluir",
+        description: "Não foi possível excluir a transação",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDeleteTransaction = (id: number) => {
+    if (confirm("Tem certeza que deseja excluir esta transação?")) {
+      deleteTransactionMutation.mutate(id);
+    }
+  };
 
   // Filter income transactions (salaries)
   const salaryTransactions = transactions?.filter(
@@ -48,7 +88,7 @@ export default function Contas() {
       ),
     },
     {
-      header: "Valentia",
+      header: "Valores",
       accessorKey: "amount",
       cell: (info) => (
         <div className="text-sm font-medium">
@@ -73,16 +113,19 @@ export default function Contas() {
     {
       header: "Ações",
       id: "actions",
-      cell: (info) => (
-        <div className="flex space-x-2">
-          <Button variant="ghost" size="sm">
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="sm">
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      ),
+      cell: (info) => {
+        const transaction = info.row.original as Transaction;
+        return (
+          <div className="flex space-x-2">
+            <Button variant="ghost" size="sm" onClick={() => handleEditTransaction(transaction)}>
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => handleDeleteTransaction(transaction.id)}>
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        );
+      },
     },
   ];
 
@@ -96,6 +139,9 @@ export default function Contas() {
     <main className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">Contas</h2>
+        <Button onClick={() => setIsAddDialogOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" /> Novo Valor
+        </Button>
       </div>
 
       <Card className="mb-6">
@@ -122,7 +168,7 @@ export default function Contas() {
                   </div>
                 </td>
                 <td className="px-4 py-2">
-                  <span className="text-sm font-medium">Total</span>
+                  <span className="text-sm font-medium">Soma</span>
                 </td>
                 <td></td>
               </tr>
@@ -131,21 +177,27 @@ export default function Contas() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {accounts?.map((account) => (
-          <div key={account.id} className="space-y-2">
-            <div className="space-y-1">
-              <h3 className="text-xl font-semibold">{account.name}</h3>
-              <p className="text-sm text-gray-500">{account.type}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-2xl font-bold">
-                {formatCurrency(Number(account.balance))}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
+      <AddTransactionDialog 
+        open={isAddDialogOpen} 
+        onOpenChange={setIsAddDialogOpen}
+        defaultValues={{
+          type: "INCOME",
+          groupType: "INCOME"
+        }}
+      />
+
+      {selectedTransaction && (
+        <AddTransactionDialog 
+          open={isEditDialogOpen} 
+          onOpenChange={setIsEditDialogOpen}
+          defaultValues={{
+            ...selectedTransaction,
+            amount: selectedTransaction.amount.toString()
+          }}
+          transactionId={selectedTransaction.id}
+          isEditing={true}
+        />
+      )}
     </main>
   );
 }
