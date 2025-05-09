@@ -76,6 +76,22 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
   }
+
+  input, select, textarea {
+    @apply w-full;
+  }
+
+  .table-container {
+    @apply -mx-4 sm:mx-0;
+  }
+
+  .responsive-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+  }
+
+  .responsive-card {
+    @apply p-3 sm:p-4 md:p-6;
+  }
 }
 
 /* Custom styles for the app */

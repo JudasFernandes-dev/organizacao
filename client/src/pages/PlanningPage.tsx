@@ -28,9 +28,9 @@ const PlanningPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 p-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-bold tracking-tight">Planejamento de Viagem</h2>
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Planejamento de Viagem</h2>
         <Button onClick={handleSave}>Salvar Planejamento</Button>
       </div>
 
@@ -44,7 +44,7 @@ const PlanningPage: React.FC = () => {
         <TabsContent value="details">
           <Card>
             <CardContent className="pt-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Destino</label>
                   <Input
