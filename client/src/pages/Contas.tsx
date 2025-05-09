@@ -1,4 +1,5 @@
-import React, { useState, useCallback } from "react";
+
+import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useFinances } from "@/hooks/useFinances";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,8 +18,7 @@ export default function Contas() {
   const { transactions } = useFinances();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] =
-    useState<Transaction | null>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
   const deleteTransactionMutation = useMutation({
     mutationFn: async (id: number) => {
@@ -52,43 +52,37 @@ export default function Contas() {
     }
   };
 
-  const salaryTransactions =
-    transactions?.filter(
-      (t) => t.type === "INCOME" && t.groupType === "INCOME",
-    ) || [];
+  const salaryTransactions = transactions?.filter(
+    (t) => t.type === "INCOME" && t.groupType === "INCOME"
+  ) || [];
 
   const columns = [
     {
       header: "Nome",
       accessorKey: "description",
-      cell: (info: any) => (
+      cell: ({ row }: any) => (
         <div className="text-sm font-medium text-gray-900">
-          {info.getValue()}
+          {row.original?.description || ""}
         </div>
       ),
     },
     {
       header: "Data",
       accessorKey: "dueDate",
-      cell: (info: any) => (
+      cell: ({ row }: any) => (
         <div className="text-sm font-medium text-gray-900">
-          {info.getValue() || "Sem descrição"}{" "}
-          {/* Valor padrão se não houver descrição */}
+          {row.original?.dueDate || ""}
         </div>
       ),
     },
     {
       header: "Valor",
       accessorKey: "amount",
-      cell: ({ row }: any) => {
-        const amount = row?.original?.amount; // Usar optional chaining para evitar erro caso row original esteja indefinido
-        return (
-          <div className="text-sm font-medium">
-            {amount ? formatCurrency(Number(amount)) : "Valor não disponível"}{" "}
-            {/* Exibe um valor alternativo se amount for indefinido */}
-          </div>
-        );
-      },
+      cell: ({ row }: any) => (
+        <div className="text-sm font-medium">
+          {row.original?.amount ? formatCurrency(Number(row.original.amount)) : "R$ 0,00"}
+        </div>
+      ),
     },
     {
       header: "Status",
@@ -96,9 +90,11 @@ export default function Contas() {
       cell: ({ row }: any) => (
         <div className="text-sm">
           <span
-            className={`status-badge ${row?.original?.status === "PENDING" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"} px-2 py-1 rounded-full`}
+            className={`status-badge ${
+              row.original?.status === "PENDING" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"
+            } px-2 py-1 rounded-full`}
           >
-            {row?.original?.status === "PENDING" ? "Pendente" : "Recebido"}
+            {row.original?.status === "PENDING" ? "Pendente" : "Recebido"}
           </span>
         </div>
       ),
@@ -106,31 +102,28 @@ export default function Contas() {
     {
       header: "Ações",
       id: "actions",
-      cell: ({ row }: any) => (
-        <div className="flex space-x-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleEditTransaction(row.original)}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              const transactionId = row?.original?.id;
-              if (transactionId !== undefined) {
-                handleDeleteTransaction(transactionId);
-              } else {
-                console.error("Transaction ID is undefined");
-              }
-            }}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      ),
+      cell: ({ row }: any) => {
+        if (!row.original?.id) return null;
+        
+        return (
+          <div className="flex space-x-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleEditTransaction(row.original)}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleDeleteTransaction(row.original.id)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        );
+      },
     },
   ];
 
@@ -152,7 +145,7 @@ export default function Contas() {
             columns={columns}
             data={salaryTransactions}
             footerRow={
-              <tr className="hover:bg-gray-50">
+              <tr key="footer" className="hover:bg-gray-50">
                 <td className="px-4 py-2">
                   <div className="text-sm font-medium">SOMA DOS VALORES</div>
                 </td>
