@@ -146,6 +146,7 @@ export default function Dashboard() {
         transactions={incomeTransactions}
         isLoading={transactionsLoading}
         showAddButton={false}
+        showActions={false}
       />
 
       {/* Financial Summary */}
