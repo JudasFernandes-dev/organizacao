@@ -53,20 +53,7 @@ export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
         </button>
       </div>
       
-      {isOpen ? (
-        <div className="px-4 py-2">
-          <Button className="w-full bg-secondary text-white hover:bg-secondary/90">
-            <Plus size={18} className="mr-2" />
-            Novo
-          </Button>
-        </div>
-      ) : (
-        <div className="px-2 py-2">
-          <Button className="w-10 h-10 p-0 bg-secondary text-white hover:bg-secondary/90">
-            <Plus size={18} />
-          </Button>
-        </div>
-      )}
+      
       
       <nav className="mt-6">
         {isOpen && (
