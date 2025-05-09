@@ -61,7 +61,7 @@ export default function Contas() {
       header: "Nome",
       accessorKey: "description",
       cell: (info: any) => (
-        <div key={`desc-${info.row.id}`} className="text-sm font-medium text-gray-900">
+        <div className="text-sm font-medium text-gray-900">
           {info.getValue()}
         </div>
       ),
@@ -103,22 +103,22 @@ export default function Contas() {
       header: "Ações",
       accessorKey: "id",
       cell: (info: any) => {
-        const transaction = salaryTransactions.find(t => t.id === info.getValue());
-        if (!transaction) return null;
+        const row = info.row.original;
+        if (!row) return null;
         
         return (
           <div className="flex space-x-2">
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleEditTransaction(transaction)}
+              onClick={() => handleEditTransaction(row)}
             >
               <Pencil className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleDeleteTransaction(transaction.id)}
+              onClick={() => handleDeleteTransaction(row.id)}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
