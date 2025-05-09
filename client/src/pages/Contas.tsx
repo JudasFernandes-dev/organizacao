@@ -1,24 +1,28 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useFinances } from "@/hooks/useFinances";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DataTable } from "@/components/ui/data-table";
-import { formatCurrency } from "@/lib/utils";
-import { Pencil, Trash2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Transaction } from "@shared/schema";
-import AddTransactionDialog from "@/components/AddTransactionDialog";
+import { DataTable } from "@/components/ui/data-table";
+import { Pencil, Trash2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import AddTransactionDialog from "@/components/AddTransactionDialog";
+import { Transaction } from "@shared/schema";
+import { formatCurrency } from "@/lib/utils";
 
 export default function Contas() {
   const { toast } = useToast();
-  const { transactions } = useFinances();
+  const queryClient = useQueryClient();
+  const { transactions, isLoading } = useFinances();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
-  const queryClient = useQueryClient();
+
+  const salaryTransactions = transactions.filter(
+    (t) => t.type === "INCOME" && t.groupType === "INCOME"
+  );
 
   const deleteTransactionMutation = useMutation({
     mutationFn: async (id: number) => {
@@ -26,6 +30,7 @@ export default function Contas() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/summary'] });
       toast({
         title: "Sucesso",
         description: "Transação excluída com sucesso",
@@ -50,10 +55,6 @@ export default function Contas() {
       deleteTransactionMutation.mutate(id);
     }
   };
-
-  const salaryTransactions = transactions?.filter(
-    (t) => t.type === "INCOME" && t.groupType === "INCOME"
-  ) || [];
 
   const columns = [
     {
@@ -110,7 +111,7 @@ export default function Contas() {
             </Button>
             <Button 
               variant="ghost" 
-              size="sm" 
+              size="sm"
               onClick={() => handleDeleteTransaction(transaction.id)}
             >
               <Trash2 className="h-4 w-4" />
@@ -121,17 +122,12 @@ export default function Contas() {
     },
   ];
 
-  const totalSalary = salaryTransactions.reduce(
-    (sum, t) => sum + Number(t.amount),
-    0
-  );
-
   return (
     <main className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
+      <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Contas</h2>
         <Button onClick={() => setIsAddDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Novo Valor
+          Nova Receita
         </Button>
       </div>
 
@@ -150,17 +146,18 @@ export default function Contas() {
                 <td className="px-4 py-2">
                   <div className="text-sm font-medium">SOMA DOS VALORES</div>
                 </td>
-                <td className="px-4 py-2">
-                  <div className="text-sm">-</div>
-                </td>
+                <td></td>
                 <td className="px-4 py-2">
                   <div className="text-sm font-medium">
-                    {formatCurrency(totalSalary)}
+                    {formatCurrency(
+                      salaryTransactions.reduce(
+                        (sum, t) => sum + Number(t.amount),
+                        0
+                      )
+                    )}
                   </div>
                 </td>
-                <td className="px-4 py-2">
-                  <span className="text-sm font-medium">Total</span>
-                </td>
+                <td></td>
                 <td></td>
               </tr>
             }
@@ -173,9 +170,7 @@ export default function Contas() {
         onOpenChange={setIsAddDialogOpen}
         defaultValues={{
           type: "INCOME",
-          groupType: "INCOME",
-          status: "PENDING",
-          paymentMethod: "OTHER"
+          groupType: "INCOME"
         }}
       />
 
