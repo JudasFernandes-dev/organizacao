@@ -95,7 +95,7 @@ export default function AddTransactionDialog({
 
   const addMutation = useMutation({
     mutationFn: async (values: z.infer<typeof formSchema>) => {
-      const numericAmount = values.amount.toString().replace(",", ".");
+      const numericAmount = parseFloat(values.amount.toString().replace(",", "."));
       const formattedValues = {
         ...values,
         amount: numericAmount,
@@ -123,7 +123,7 @@ export default function AddTransactionDialog({
 
   const updateMutation = useMutation({
     mutationFn: async (values: z.infer<typeof formSchema>) => {
-      const numericAmount = values.amount.toString().replace(",", ".");
+      const numericAmount = parseFloat(values.amount.toString().replace(",", "."));
       const formattedValues = {
         ...values,
         amount: numericAmount,
