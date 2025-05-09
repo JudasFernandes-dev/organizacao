@@ -143,25 +143,25 @@ export default function Contas() {
         <CardContent>
           <DataTable
             columns={columns}
-            data={salaryTransactions}
+            data={salaryTransactions || []}
             footerRow={
               <tr key="footer" className="hover:bg-gray-50">
-                <td className="px-4 py-2">
+                <td key="desc" className="px-4 py-2">
                   <div className="text-sm font-medium">SOMA DOS VALORES</div>
                 </td>
-                <td></td>
-                <td className="px-4 py-2">
+                <td key="date"></td>
+                <td key="amount" className="px-4 py-2">
                   <div className="text-sm font-medium">
                     {formatCurrency(
-                      salaryTransactions.reduce(
-                        (sum, t) => sum + Number(t.amount),
+                      (salaryTransactions || []).reduce(
+                        (sum, t) => sum + Number(t?.amount || 0),
                         0,
                       ),
                     )}
                   </div>
                 </td>
-                <td></td>
-                <td></td>
+                <td key="status"></td>
+                <td key="actions"></td>
               </tr>
             }
           />
