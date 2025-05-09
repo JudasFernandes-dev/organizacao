@@ -42,12 +42,12 @@ export default function ExpenseGroup({
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   const handleEditTransaction = (transaction: Transaction) => {
     setSelectedTransaction(transaction);
     setIsEditDialogOpen(true);
   };
-  
+
   // Mutation para excluir transação
   const deleteTransactionMutation = useMutation({
     mutationFn: async (id: number) => {
@@ -57,7 +57,7 @@ export default function ExpenseGroup({
       // Revalidar a consulta para atualizar a lista de transações
       queryClient.invalidateQueries({ queryKey: ['/api/transactions'] });
       queryClient.invalidateQueries({ queryKey: ['/api/dashboard/summary'] });
-      
+
       toast({
         title: "Transação excluída",
         description: "A transação foi excluída com sucesso",
@@ -72,13 +72,13 @@ export default function ExpenseGroup({
       });
     },
   });
-  
+
   const handleDeleteTransaction = (id: number) => {
     if (confirm("Tem certeza que deseja excluir esta transação?")) {
       deleteTransactionMutation.mutate(id);
     }
   };
-  
+
   const columns = [
     {
       header: "Conta",
@@ -118,7 +118,7 @@ export default function ExpenseGroup({
         const status = info.getValue() as string;
         const statusClass = status === "PENDING" ? "status-pending" : "status-paid";
         const statusText = status === "PENDING" ? "Pendente" : "Pago";
-        
+
         return (
           <span className={`status-badge ${statusClass}`}>
             {statusText}
@@ -126,39 +126,8 @@ export default function ExpenseGroup({
         );
       },
     },
-    {
-      header: "Ações",
-      accessorKey: "id",
-      width: "15%", // Ações com tamanho fixo
-      cell: (info) => {
-        const id = info.getValue() as number;
-        const transaction = transactions.find(t => t.id === id);
-        if (!transaction) return null;
-        
-        return (
-          <div className="flex space-x-1">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => handleEditTransaction(transaction)}
-              className="p-0 h-8 w-8"
-            >
-              <Pencil className="h-4 w-4 text-gray-500 hover:text-primary" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => handleDeleteTransaction(id)}
-              className="p-0 h-8 w-8"
-            >
-              <Trash2 className="h-4 w-4 text-gray-500 hover:text-destructive" />
-            </Button>
-          </div>
-        );
-      },
-    },
   ];
-  
+
   const totalAmount = transactions.reduce(
     (sum, transaction) => sum + Number(transaction.amount),
     0
@@ -169,7 +138,7 @@ export default function ExpenseGroup({
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-lg font-semibold text-gray-800">{title}</CardTitle>
       </CardHeader>
-      
+
       <CardContent>
         {isLoading ? (
           <div className="space-y-2">
@@ -197,7 +166,7 @@ export default function ExpenseGroup({
                 }
               />
             </div>
-            
+
             {cardInfo && (
               <div className="mt-4 bg-gray-50 p-3 rounded-md">
                 <div className="flex justify-between items-center">
@@ -208,7 +177,7 @@ export default function ExpenseGroup({
                 </div>
               </div>
             )}
-            
+
             {transactions.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
                 {Object.entries(transactions.reduce((acc, t) => {
@@ -232,14 +201,14 @@ export default function ExpenseGroup({
           </>
         )}
       </CardContent>
-      
+
       {/* Dialog para adicionar nova transação */}
       <AddTransactionDialog 
         open={isAddDialogOpen} 
         onOpenChange={setIsAddDialogOpen}
         groupType={title.includes("Grupo 1") ? "GROUP1" : "GROUP2"}
       />
-      
+
       {/* Dialog para editar transação existente */}
       {selectedTransaction && (
         <AddTransactionDialog 
