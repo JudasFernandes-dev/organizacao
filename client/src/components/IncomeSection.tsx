@@ -105,7 +105,7 @@ export default function IncomeSection({
         const statusText = status === "PENDING" ? "Pendente" : "Recebido";
         
         return (
-          <span className={`status-badge ${statusClass}`}>
+          <span className={`status-badge ${statusClass} text-center block`}>
             {statusText}
           </span>
         );
