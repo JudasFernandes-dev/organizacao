@@ -209,15 +209,20 @@ export default function ExpenseGroup({
               </div>
             )}
             
-            {paymentSummary && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                {paymentSummary.map((item) => (
-                  <div key={item.id} className="bg-gray-50 p-3 rounded-md">
-                    <div className="text-xs text-gray-500 mb-1">TOTAL {item.id}</div>
+            {transactions.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+                {Object.entries(transactions.reduce((acc, t) => {
+                  if (t.type === 'EXPENSE') {
+                    acc[t.paymentMethod] = (acc[t.paymentMethod] || 0) + Number(t.amount);
+                  }
+                  return acc;
+                }, {} as Record<string, number>)).map(([method, total], idx) => (
+                  <div key={method} className="bg-gray-50 p-3 rounded-md">
+                    <div className="text-xs text-gray-500 mb-1">PAGAMENTO</div>
                     <div className="flex justify-between items-center">
-                      <div className="text-sm text-gray-600">{item.label}</div>
+                      <div className="text-sm text-gray-600">{method}</div>
                       <div className="text-sm font-medium text-negative">
-                        {formatCurrency(item.value)}
+                        {formatCurrency(total)}
                       </div>
                     </div>
                   </div>
