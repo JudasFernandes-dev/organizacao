@@ -15,7 +15,7 @@ import { apiRequest } from "@/lib/queryClient";
 export default function Contas() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { transactions, isLoading } = useFinances();
+  const { transactions } = useFinances();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
@@ -52,45 +52,45 @@ export default function Contas() {
     }
   };
 
-  const salaryTransactions = transactions.filter(
+  const salaryTransactions = transactions?.filter(
     (t) => t.type === "INCOME" && t.groupType === "INCOME"
-  );
+  ) || [];
 
   const columns = [
     {
       header: "Nome",
       accessorKey: "description",
-      cell: (info: any) => (
+      cell: ({ row }: any) => (
         <div className="text-sm font-medium text-gray-900">
-          {info.getValue()}
+          {row.original.description}
         </div>
       ),
     },
     {
       header: "Data",
       accessorKey: "dueDate",
-      cell: (info: any) => (
+      cell: ({ row }: any) => (
         <div className="text-sm text-gray-500">
-          {new Date(info.getValue()).toLocaleDateString()}
+          {new Date(row.original.dueDate).toLocaleDateString()}
         </div>
       ),
     },
     {
       header: "Valor",
       accessorKey: "amount",
-      cell: (info: any) => (
+      cell: ({ row }: any) => (
         <div className="text-sm font-medium">
-          {formatCurrency(Number(info.getValue()))}
+          {formatCurrency(Number(row.original.amount))}
         </div>
       ),
     },
     {
       header: "Status",
       accessorKey: "status",
-      cell: (info: any) => (
+      cell: ({ row }: any) => (
         <div className="text-sm">
-          <span className={`status-badge ${info.getValue() === "PENDING" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"} px-2 py-1 rounded-full`}>
-            {info.getValue() === "PENDING" ? "Pendente" : "Recebido"}
+          <span className={`status-badge ${row.original.status === "PENDING" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"} px-2 py-1 rounded-full`}>
+            {row.original.status === "PENDING" ? "Pendente" : "Recebido"}
           </span>
         </div>
       ),
@@ -98,27 +98,24 @@ export default function Contas() {
     {
       header: "Ações",
       id: "actions",
-      cell: (info: any) => {
-        const transaction = info.row.original;
-        return (
-          <div className="flex space-x-2">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => handleEditTransaction(transaction)}
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => handleDeleteTransaction(transaction.id)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        );
-      },
+      cell: ({ row }: any) => (
+        <div className="flex space-x-2">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => handleEditTransaction(row.original)}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => handleDeleteTransaction(row.original.id)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
     },
   ];
 
@@ -142,7 +139,7 @@ export default function Contas() {
             columns={columns} 
             data={salaryTransactions}
             footerRow={
-              <tr key="footer" className="hover:bg-gray-50">
+              <tr className="hover:bg-gray-50">
                 <td className="px-4 py-2">
                   <div className="text-sm font-medium">SOMA DOS VALORES</div>
                 </td>
@@ -165,16 +162,18 @@ export default function Contas() {
         </CardContent>
       </Card>
 
-      <AddTransactionDialog 
-        open={isAddDialogOpen} 
-        onOpenChange={setIsAddDialogOpen}
-        defaultValues={{
-          type: "INCOME",
-          groupType: "INCOME"
-        }}
-      />
+      {isAddDialogOpen && (
+        <AddTransactionDialog 
+          open={isAddDialogOpen} 
+          onOpenChange={setIsAddDialogOpen}
+          defaultValues={{
+            type: "INCOME",
+            groupType: "INCOME"
+          }}
+        />
+      )}
 
-      {selectedTransaction && (
+      {selectedTransaction && isEditDialogOpen && (
         <AddTransactionDialog 
           open={isEditDialogOpen} 
           onOpenChange={setIsEditDialogOpen}
