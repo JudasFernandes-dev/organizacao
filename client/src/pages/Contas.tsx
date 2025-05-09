@@ -62,7 +62,7 @@ export default function Contas() {
       accessorKey: "description",
       cell: (info: any) => (
         <div className="text-sm font-medium text-gray-900">
-          {info.row.original?.description}
+          {info.getValue()}
         </div>
       ),
     },
@@ -71,7 +71,7 @@ export default function Contas() {
       accessorKey: "dueDate",
       cell: (info: any) => (
         <div className="text-sm font-medium text-gray-900">
-          {info.row.original?.dueDate}
+          {info.getValue()}
         </div>
       ),
     },
@@ -80,7 +80,7 @@ export default function Contas() {
       accessorKey: "amount",
       cell: (info: any) => (
         <div className="text-sm font-medium">
-          {info.row.original?.amount ? formatCurrency(Number(info.row.original.amount)) : "R$ 0,00"}
+          {info.getValue() ? formatCurrency(Number(info.getValue())) : "R$ 0,00"}
         </div>
       ),
     },
@@ -91,10 +91,10 @@ export default function Contas() {
         <div className="text-sm">
           <span
             className={`status-badge ${
-              info.row.original?.status === "PENDING" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"
+              info.getValue() === "PENDING" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"
             } px-2 py-1 rounded-full`}
           >
-            {info.row.original?.status === "PENDING" ? "Pendente" : "Recebido"}
+            {info.getValue() === "PENDING" ? "Pendente" : "Recebido"}
           </span>
         </div>
       ),
