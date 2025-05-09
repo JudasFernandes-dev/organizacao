@@ -8,6 +8,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Plane, Hotel, Utensils, MapPin } from 'lucide-react';
 
 interface TravelItem {
   id: string;
@@ -86,9 +89,9 @@ const PlanningPage: React.FC = () => {
         <h2 className="text-3xl font-bold">Planejamento de Viagens</h2>
         <Dialog>
           <DialogTrigger asChild>
-            <Button>Adicionar Nova Viagem</Button>
+            <Button>Nova Viagem</Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
               <DialogTitle>Nova Viagem</DialogTitle>
             </DialogHeader>
@@ -137,7 +140,7 @@ const PlanningPage: React.FC = () => {
         {travels.map(travel => {
           const totals = calculateTotals(travel);
           return (
-            <Card key={travel.id}>
+            <Card key={travel.id} className="hover:shadow-lg transition-shadow">
               <CardContent className="p-6 space-y-4">
                 <div className="flex justify-between items-start">
                   <div>
@@ -150,9 +153,52 @@ const PlanningPage: React.FC = () => {
                     R$ {totals.total.toFixed(2)}
                   </Badge>
                 </div>
-                
+
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <p className="text-gray-500">Orçamento</p>
+                    <p className="font-medium">R$ {travel.budget.toFixed(2)}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Restante</p>
+                    <p className="font-medium">R$ {(travel.budget - totals.total).toFixed(2)}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <p className="text-gray-500">Pago</p>
+                    <p className="font-medium text-green-600">R$ {totals.paid.toFixed(2)}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Pendente</p>
+                    <p className="font-medium text-red-600">R$ {totals.pending.toFixed(2)}</p>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <div className="grid grid-cols-4 gap-2 text-center text-xs">
+                    <div>
+                      <Plane className="w-4 h-4 mx-auto mb-1" />
+                      <p>R$ {totals.flights.toFixed(2)}</p>
+                    </div>
+                    <div>
+                      <Hotel className="w-4 h-4 mx-auto mb-1" />
+                      <p>R$ {totals.hotels.toFixed(2)}</p>
+                    </div>
+                    <div>
+                      <MapPin className="w-4 h-4 mx-auto mb-1" />
+                      <p>R$ {totals.activities.toFixed(2)}</p>
+                    </div>
+                    <div>
+                      <Utensils className="w-4 h-4 mx-auto mb-1" />
+                      <p>R$ {totals.restaurants.toFixed(2)}</p>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="flex gap-2">
-                  <Button variant="outline" onClick={() => {
+                  <Button variant="outline" className="flex-1" onClick={() => {
                     setSelectedTravel(travel);
                     setShowDetails(true);
                   }}>Ver Detalhes</Button>
@@ -188,39 +234,120 @@ const PlanningPage: React.FC = () => {
             <DialogHeader>
               <DialogTitle>{selectedTravel.name} - Detalhes</DialogTitle>
             </DialogHeader>
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold">Orçamento Previsto</h4>
-                  <p>R$ {selectedTravel.budget.toFixed(2)}</p>
+            <Tabs defaultValue="overview" className="w-full">
+              <TabsList className="grid w-full grid-cols-5">
+                <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+                <TabsTrigger value="flights">Voos</TabsTrigger>
+                <TabsTrigger value="hotels">Hotéis</TabsTrigger>
+                <TabsTrigger value="activities">Passeios</TabsTrigger>
+                <TabsTrigger value="restaurants">Restaurantes</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="overview" className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-semibold">Orçamento Previsto</h4>
+                    <p>R$ {selectedTravel.budget.toFixed(2)}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Gasto Real</h4>
+                    <p>R$ {calculateTotals(selectedTravel).total.toFixed(2)}</p>
+                  </div>
                 </div>
                 <div>
-                  <h4 className="font-semibold">Gasto Real</h4>
-                  <p>R$ {calculateTotals(selectedTravel).total.toFixed(2)}</p>
+                  <h4 className="font-semibold">Observações</h4>
+                  <p className="text-gray-600">{selectedTravel.notes}</p>
                 </div>
-              </div>
+              </TabsContent>
 
-              {/* Seções de itens aqui */}
-              <div className="space-y-4">
-                <h4 className="font-semibold">Voos</h4>
-                {/* Lista de voos */}
-              </div>
+              <TabsContent value="flights" className="space-y-4">
+                <Button onClick={() => handleAddItem(selectedTravel.id, {
+                  id: '',
+                  type: 'flight',
+                  name: '',
+                  amount: 0,
+                  paid: false
+                })}>
+                  Adicionar Voo
+                </Button>
+                {selectedTravel.items
+                  .filter(item => item.type === 'flight')
+                  .map(flight => (
+                    <Card key={flight.id}>
+                      <CardContent className="p-4">
+                        <h4>{flight.name}</h4>
+                        <p>R$ {flight.amount.toFixed(2)}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
+              </TabsContent>
 
-              <div className="space-y-4">
-                <h4 className="font-semibold">Hotéis</h4>
-                {/* Lista de hotéis */}
-              </div>
+              <TabsContent value="hotels" className="space-y-4">
+                <Button onClick={() => handleAddItem(selectedTravel.id, {
+                  id: '',
+                  type: 'hotel',
+                  name: '',
+                  amount: 0,
+                  paid: false
+                })}>
+                  Adicionar Hotel
+                </Button>
+                {selectedTravel.items
+                  .filter(item => item.type === 'hotel')
+                  .map(hotel => (
+                    <Card key={hotel.id}>
+                      <CardContent className="p-4">
+                        <h4>{hotel.name}</h4>
+                        <p>R$ {hotel.amount.toFixed(2)}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
+              </TabsContent>
 
-              <div className="space-y-4">
-                <h4 className="font-semibold">Passeios</h4>
-                {/* Lista de passeios */}
-              </div>
+              <TabsContent value="activities" className="space-y-4">
+                <Button onClick={() => handleAddItem(selectedTravel.id, {
+                  id: '',
+                  type: 'activity',
+                  name: '',
+                  amount: 0,
+                  paid: false
+                })}>
+                  Adicionar Passeio
+                </Button>
+                {selectedTravel.items
+                  .filter(item => item.type === 'activity')
+                  .map(activity => (
+                    <Card key={activity.id}>
+                      <CardContent className="p-4">
+                        <h4>{activity.name}</h4>
+                        <p>R$ {activity.amount.toFixed(2)}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
+              </TabsContent>
 
-              <div className="space-y-4">
-                <h4 className="font-semibold">Restaurantes</h4>
-                {/* Lista de restaurantes */}
-              </div>
-            </div>
+              <TabsContent value="restaurants" className="space-y-4">
+                <Button onClick={() => handleAddItem(selectedTravel.id, {
+                  id: '',
+                  type: 'restaurant',
+                  name: '',
+                  amount: 0,
+                  paid: false
+                })}>
+                  Adicionar Restaurante
+                </Button>
+                {selectedTravel.items
+                  .filter(item => item.type === 'restaurant')
+                  .map(restaurant => (
+                    <Card key={restaurant.id}>
+                      <CardContent className="p-4">
+                        <h4>{restaurant.name}</h4>
+                        <p>R$ {restaurant.amount.toFixed(2)}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
+              </TabsContent>
+            </Tabs>
           </DialogContent>
         </Dialog>
       )}
