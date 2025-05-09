@@ -6,15 +6,26 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
-import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 interface TripItem {
   id: string;
+  type: 'flight' | 'hotel' | 'activity' | 'restaurant';
   name: string;
   date: string;
   amount: number;
   paid: boolean;
-  details?: any;
+  details?: {
+    airline?: string;
+    flightNumber?: string;
+    checkIn?: string;
+    checkOut?: string;
+    location?: string;
+    notes?: string;
+  };
 }
 
 interface Trip {
@@ -24,13 +35,10 @@ interface Trip {
   endDate: string;
   budget: number;
   notes: string;
-  flights: TripItem[];
-  hotels: TripItem[];
-  activities: TripItem[];
-  restaurants: TripItem[];
+  items: TripItem[];
 }
 
-const ItemCard = ({ item, onEdit, onDelete, type }: { item: TripItem; onEdit: () => void; onDelete: () => void; type: string }) => (
+const ItemCard = ({ item, onEdit, onDelete }: { item: TripItem; onEdit: () => void; onDelete: () => void }) => (
   <Card>
     <CardContent className="p-4 space-y-2">
       <div className="flex justify-between items-start">
@@ -38,11 +46,31 @@ const ItemCard = ({ item, onEdit, onDelete, type }: { item: TripItem; onEdit: ()
           <h3 className="font-semibold">{item.name}</h3>
           <p className="text-sm text-gray-500">{format(new Date(item.date), 'dd/MM/yyyy')}</p>
         </div>
-        <Badge variant={item.paid ? "default" : "secondary"}>
+        <Badge variant={item.paid ? "default" : "destructive"}>
           {item.paid ? "Pago" : "A pagar"}
         </Badge>
       </div>
       <p className="text-lg font-semibold">R$ {item.amount.toFixed(2)}</p>
+      {item.details && (
+        <div className="text-sm text-gray-600">
+          {item.type === 'flight' && (
+            <>
+              <p>Companhia: {item.details.airline}</p>
+              <p>Voo: {item.details.flightNumber}</p>
+            </>
+          )}
+          {item.type === 'hotel' && (
+            <>
+              <p>Check-in: {format(new Date(item.details.checkIn!), 'dd/MM/yyyy')}</p>
+              <p>Check-out: {format(new Date(item.details.checkOut!), 'dd/MM/yyyy')}</p>
+              <p>Local: {item.details.location}</p>
+            </>
+          )}
+          {(item.type === 'activity' || item.type === 'restaurant') && item.details.notes && (
+            <p>Observações: {item.details.notes}</p>
+          )}
+        </div>
+      )}
       <div className="flex gap-2">
         <Button variant="outline" size="sm" onClick={onEdit}>Editar</Button>
         <AlertDialog>
@@ -70,16 +98,18 @@ const ItemCard = ({ item, onEdit, onDelete, type }: { item: TripItem; onEdit: ()
 const TripDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const [trip, setTrip] = useState<Trip | null>(null);
-  const [filter, setFilter] = useState<'all' | 'paid' | 'pending'>('all');
+  const [showAddItem, setShowAddItem] = useState(false);
+  const [selectedTab, setSelectedTab] = useState('flights');
+  const [itemType, setItemType] = useState<TripItem['type']>('flight');
 
   const calculateTotals = () => {
     if (!trip) return { flights: 0, hotels: 0, activities: 0, restaurants: 0, total: 0 };
     
     const totals = {
-      flights: trip.flights.reduce((sum, item) => sum + item.amount, 0),
-      hotels: trip.hotels.reduce((sum, item) => sum + item.amount, 0),
-      activities: trip.activities.reduce((sum, item) => sum + item.amount, 0),
-      restaurants: trip.restaurants.reduce((sum, item) => sum + item.amount, 0)
+      flights: trip.items.filter(i => i.type === 'flight').reduce((sum, i) => sum + i.amount, 0),
+      hotels: trip.items.filter(i => i.type === 'hotel').reduce((sum, i) => sum + i.amount, 0),
+      activities: trip.items.filter(i => i.type === 'activity').reduce((sum, i) => sum + i.amount, 0),
+      restaurants: trip.items.filter(i => i.type === 'restaurant').reduce((sum, i) => sum + i.amount, 0)
     };
     
     return {
@@ -107,30 +137,45 @@ const TripDetailsPage = () => {
             </Badge>
           </div>
 
-          <Tabs defaultValue="flights">
-            <TabsList>
+          <Tabs defaultValue="flights" onValueChange={(value) => setSelectedTab(value)}>
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="flights">✈️ Voos</TabsTrigger>
               <TabsTrigger value="hotels">🏨 Hotéis</TabsTrigger>
               <TabsTrigger value="activities">🎡 Passeios</TabsTrigger>
               <TabsTrigger value="restaurants">🍽️ Restaurantes</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="flights" className="space-y-4">
-              <Button>Adicionar Voo</Button>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {trip.flights.map(flight => (
-                  <ItemCard 
-                    key={flight.id} 
-                    item={flight} 
-                    type="flight"
-                    onEdit={() => {}} 
-                    onDelete={() => {}}
-                  />
-                ))}
-              </div>
-            </TabsContent>
-
-            {/* Similar TabsContent for hotels, activities, and restaurants */}
+            {['flights', 'hotels', 'activities', 'restaurants'].map(tabValue => (
+              <TabsContent key={tabValue} value={tabValue} className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-xl font-semibold">
+                    {tabValue === 'flights' && 'Voos'}
+                    {tabValue === 'hotels' && 'Hotéis'}
+                    {tabValue === 'activities' && 'Passeios'}
+                    {tabValue === 'restaurants' && 'Restaurantes'}
+                  </h3>
+                  <Button onClick={() => {
+                    setItemType(tabValue.slice(0, -1) as TripItem['type']);
+                    setShowAddItem(true);
+                  }}>
+                    Adicionar
+                  </Button>
+                </div>
+                
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {trip.items
+                    .filter(item => item.type === tabValue.slice(0, -1))
+                    .map(item => (
+                      <ItemCard
+                        key={item.id}
+                        item={item}
+                        onEdit={() => {}}
+                        onDelete={() => {}}
+                      />
+                    ))}
+                </div>
+              </TabsContent>
+            ))}
           </Tabs>
 
           <Card>
@@ -175,6 +220,36 @@ const TripDetailsPage = () => {
           </Card>
         </>
       )}
+
+      <Dialog open={showAddItem} onOpenChange={setShowAddItem}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Adicionar {
+              itemType === 'flight' ? 'Voo' :
+              itemType === 'hotel' ? 'Hotel' :
+              itemType === 'activity' ? 'Passeio' :
+              'Restaurante'
+            }</DialogTitle>
+          </DialogHeader>
+          <form className="space-y-4">
+            <div className="space-y-2">
+              <Label>Nome</Label>
+              <Input />
+            </div>
+            <div className="space-y-2">
+              <Label>Data</Label>
+              <Input type="date" />
+            </div>
+            <div className="space-y-2">
+              <Label>Valor</Label>
+              <Input type="number" step="0.01" />
+            </div>
+            <DialogFooter>
+              <Button type="submit">Salvar</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
