@@ -352,8 +352,8 @@ export default function AddTransactionDialog({
                       <SelectContent>
                         <SelectItem value="NUBANK">NUBANK</SelectItem>
                         <SelectItem value="INTER">INTER</SelectItem>
-                        <SelectItem value="PIX">PIX</SelectItem>
-                        <SelectItem value="CASH">DINHEIRO</SelectItem>
+                        <SelectItem value="CASH">CASH</SelectItem>
+                        <SelectItem value="OTHER">OTHER</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

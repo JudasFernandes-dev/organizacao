@@ -209,7 +209,7 @@ export default function ExpenseGroup({
               </div>
             )}
             
-            {transactions.length > 0 && title.includes("Grupo 2") && (
+            {transactions.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
                 {Object.entries(transactions.reduce((acc, t) => {
                   if (t.type === 'EXPENSE') {
