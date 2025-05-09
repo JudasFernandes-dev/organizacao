@@ -296,7 +296,6 @@ export default function AddTransactionDialog({
                       <SelectContent>
                         <SelectItem value="PENDING">Pendente</SelectItem>
                         <SelectItem value="PAID">Pago</SelectItem>
-                        <SelectItem value="RECEIVED">Recebido</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
