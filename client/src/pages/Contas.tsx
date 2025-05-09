@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useFinances } from "@/hooks/useFinances";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,11 +20,6 @@ export default function Contas() {
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const queryClient = useQueryClient();
 
-  const handleEditTransaction = (transaction: Transaction) => {
-    setSelectedTransaction(transaction);
-    setIsEditDialogOpen(true);
-  };
-
   const deleteTransactionMutation = useMutation({
     mutationFn: async (id: number) => {
       return apiRequest("DELETE", `/api/transactions/${id}`);
@@ -32,18 +27,23 @@ export default function Contas() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/transactions'] });
       toast({
-        title: "Transação excluída",
-        description: "A transação foi excluída com sucesso",
+        title: "Sucesso",
+        description: "Transação excluída com sucesso",
       });
     },
     onError: () => {
       toast({
-        title: "Erro ao excluir",
-        description: "Não foi possível excluir a transação",
+        title: "Erro",
+        description: "Erro ao excluir transação",
         variant: "destructive",
       });
     },
   });
+
+  const handleEditTransaction = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    setIsEditDialogOpen(true);
+  };
 
   const handleDeleteTransaction = (id: number) => {
     if (confirm("Tem certeza que deseja excluir esta transação?")) {
@@ -66,16 +66,16 @@ export default function Contas() {
       ),
     },
     {
-      header: "Dados",
+      header: "Data",
       accessorKey: "dueDate",
       cell: (info: any) => (
         <div className="text-sm text-gray-500">
-          Até dia {new Date(info.getValue()).getDate()}
+          {new Date(info.getValue()).toLocaleDateString()}
         </div>
       ),
     },
     {
-      header: "Valores",
+      header: "Valor",
       accessorKey: "amount",
       cell: (info: any) => (
         <div className="text-sm font-medium">
@@ -135,7 +135,7 @@ export default function Contas() {
       <Card className="mb-6">
         <CardHeader>
           <CardTitle className="text-lg font-semibold text-gray-800">
-            Valor a Receber - Salários
+            Valores a Receber
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -143,7 +143,7 @@ export default function Contas() {
             columns={columns} 
             data={salaryTransactions}
             footerRow={
-              <tr className="hover:bg-gray-50">
+              <tr key="footer" className="hover:bg-gray-50">
                 <td className="px-4 py-2">
                   <div className="text-sm font-medium">SOMA DOS VALORES</div>
                 </td>
@@ -178,10 +178,7 @@ export default function Contas() {
         <AddTransactionDialog 
           open={isEditDialogOpen} 
           onOpenChange={setIsEditDialogOpen}
-          defaultValues={{
-            ...selectedTransaction,
-            amount: selectedTransaction.amount.toString()
-          }}
+          defaultValues={selectedTransaction}
           transactionId={selectedTransaction.id}
           isEditing={true}
         />
