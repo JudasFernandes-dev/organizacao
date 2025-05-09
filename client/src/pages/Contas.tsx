@@ -60,9 +60,9 @@ export default function Contas() {
     {
       header: "Nome",
       accessorKey: "description",
-      cell: ({ row }: any) => (
+      cell: (info: any) => (
         <div className="text-sm font-medium text-gray-900">
-          {row.original.description}
+          {info.getValue()}
         </div>
       ),
     },
