@@ -14,7 +14,7 @@ import { apiRequest } from "@/lib/queryClient";
 
 export default function Contas() {
   const { toast } = useToast();
-  const { transactions, error } = useFinances();
+  const { transactions } = useFinances();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
@@ -143,7 +143,7 @@ export default function Contas() {
             columns={columns} 
             data={salaryTransactions}
             footerRow={
-              <tr key="footer" className="hover:bg-gray-50">
+              <tr className="hover:bg-gray-50">
                 <td className="px-4 py-2">
                   <div className="text-sm font-medium">SOMA DOS VALORES</div>
                 </td>
