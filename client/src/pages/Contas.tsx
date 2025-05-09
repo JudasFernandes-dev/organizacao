@@ -14,21 +14,11 @@ import { apiRequest } from "@/lib/queryClient";
 
 export default function Contas() {
   const { toast } = useToast();
-  const { accounts, transactions, error } = useFinances();
+  const { transactions, error } = useFinances();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const queryClient = useQueryClient();
-
-  useEffect(() => {
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch accounts data",
-        variant: "destructive",
-      });
-    }
-  }, [error, toast]);
 
   const handleEditTransaction = (transaction: Transaction) => {
     setSelectedTransaction(transaction);
@@ -41,11 +31,9 @@ export default function Contas() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/summary'] });
       toast({
         title: "Transação excluída",
         description: "A transação foi excluída com sucesso",
-        variant: "default",
       });
     },
     onError: () => {
@@ -63,7 +51,6 @@ export default function Contas() {
     }
   };
 
-  // Filter income transactions (salaries)
   const salaryTransactions = transactions?.filter(
     (t) => t.type === "INCOME" && t.groupType === "INCOME"
   ) || [];
@@ -72,25 +59,25 @@ export default function Contas() {
     {
       header: "Nome",
       accessorKey: "description",
-      cell: (info) => (
+      cell: (info: any) => (
         <div className="text-sm font-medium text-gray-900">
-          {info.getValue() as string}
+          {info.getValue()}
         </div>
       ),
     },
     {
       header: "Dados",
       accessorKey: "dueDate",
-      cell: (info) => (
+      cell: (info: any) => (
         <div className="text-sm text-gray-500">
-          Até dia {new Date(info.getValue() as string).getDate()}
+          Até dia {new Date(info.getValue()).getDate()}
         </div>
       ),
     },
     {
       header: "Valores",
       accessorKey: "amount",
-      cell: (info) => (
+      cell: (info: any) => (
         <div className="text-sm font-medium">
           {formatCurrency(Number(info.getValue()))}
         </div>
@@ -99,37 +86,38 @@ export default function Contas() {
     {
       header: "Status",
       accessorKey: "status",
-      cell: (info) => {
-        const status = info.getValue() as string;
-        return (
-          <div className="text-sm">
-            <span className={`status-badge ${status === "PENDING" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"} px-2 py-1 rounded-full`}>
-              {status === "PENDING" ? "Pendente" : "Recebido"}
-            </span>
-          </div>
-        );
-      },
+      cell: (info: any) => (
+        <div className="text-sm">
+          <span className={`status-badge ${info.getValue() === "PENDING" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"} px-2 py-1 rounded-full`}>
+            {info.getValue() === "PENDING" ? "Pendente" : "Recebido"}
+          </span>
+        </div>
+      ),
     },
     {
       header: "Ações",
       id: "actions",
-      cell: (info) => {
-        const transaction = info.row.original as Transaction;
-        return (
-          <div className="flex space-x-2">
-            <Button variant="ghost" size="sm" onClick={() => handleEditTransaction(transaction)}>
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => handleDeleteTransaction(transaction.id)}>
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        );
-      },
+      cell: (info: any) => (
+        <div className="flex space-x-2">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => handleEditTransaction(info.row.original)}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => handleDeleteTransaction(info.row.original.id)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
     },
   ];
 
-  // Calculate total
   const totalSalary = salaryTransactions.reduce(
     (sum, t) => sum + Number(t.amount),
     0
@@ -155,9 +143,9 @@ export default function Contas() {
             columns={columns} 
             data={salaryTransactions}
             footerRow={
-              <tr className="hover:bg-gray-50">
+              <tr key="footer" className="hover:bg-gray-50">
                 <td className="px-4 py-2">
-                  <div className="text-sm font-medium">SOMA DOS DOIS</div>
+                  <div className="text-sm font-medium">SOMA DOS VALORES</div>
                 </td>
                 <td className="px-4 py-2">
                   <div className="text-sm">-</div>
@@ -168,7 +156,7 @@ export default function Contas() {
                   </div>
                 </td>
                 <td className="px-4 py-2">
-                  <span className="text-sm font-medium">Soma</span>
+                  <span className="text-sm font-medium">Total</span>
                 </td>
                 <td></td>
               </tr>
