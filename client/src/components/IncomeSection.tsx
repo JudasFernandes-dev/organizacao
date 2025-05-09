@@ -111,6 +111,37 @@ export default function IncomeSection({
         );
       },
     },
+    {
+      header: "Ações",
+      accessorKey: "id",
+      width: "15%", // Ações com tamanho fixo
+      cell: (info) => {
+        const id = info.getValue() as number;
+        const transaction = transactions.find(t => t.id === id);
+        if (!transaction) return null;
+        
+        return (
+          <div className="flex space-x-1">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => handleEditTransaction(transaction)}
+              className="p-0 h-8 w-8"
+            >
+              <Pencil className="h-4 w-4 text-gray-500 hover:text-primary" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => handleDeleteTransaction(id)}
+              className="p-0 h-8 w-8"
+            >
+              <Trash2 className="h-4 w-4 text-gray-500 hover:text-destructive" />
+            </Button>
+          </div>
+        );
+      },
+    },
   ];
   
   // Calculate total income
